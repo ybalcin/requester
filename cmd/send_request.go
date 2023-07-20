@@ -21,7 +21,7 @@ func SendRequests(ctx context.Context) error {
 		return errors.New("at least one url is required")
 	}
 
-	reqter := requester.New(requester.WithWorkerCount(*parallel), requester.WithHandleRespBody(handleRespBody))
+	reqter := requester.New(requester.WithWorkerCount(*parallel), requester.WithHandleSuccess(handleRespBody), requester.WithHandleFailure(handleFailure))
 	go func() {
 		<-ctx.Done()
 		reqter.Wait()
@@ -48,4 +48,8 @@ func SendRequests(ctx context.Context) error {
 func handleRespBody(req requester.Request, respBody []byte) {
 	hashedBody := md5.Sum(respBody)
 	fmt.Printf("%s %x\n", req.URL.String(), hashedBody)
+}
+
+func handleFailure(err error) {
+	fmt.Println(err.Error())
 }
